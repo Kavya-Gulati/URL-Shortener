@@ -8,6 +8,9 @@ parser_shorten = subparsers.add_parser('shorten', help = 'shortens a URL')
 parser_shorten.add_argument('URL', help = 'URL to be shortened', nargs = "?")
 parser_shorten.add_argument('--alias', help = 'provide an alias(optional)', default= None)
 
+parser_resolve = subparsers.add_parser('resolve', help='resolves code back into URL')
+parser_resolve.add_argument('code', help='Code to be resolved back into a URL')
+
 def CheckValidity(url):
     try:
         result = urlparse(url)
@@ -69,10 +72,40 @@ def ShortenURL(args):
                 print(url, '==>', data[url])
                 return data[url]
             
+def ResolveCode(args):
+    code = args.code
+    data = {}
+
+    try:
+        with open('data.json', 'r') as f:
+            data = json.load(f)
+            if code not in data.values():
+                print('error: The given code is invalid')
+                return
+            
+            else:
+                url = None
+                for key in data.keys():
+                    if data[key] == code:
+                        url = key
+                        break
+
+                print('-'*9,'The code has been resolved into the URL','-'*9) 
+                print(code, '==>', url)
+                return url
     
+    except FileNotFoundError:
+        print("error: The given file doesn't exist")
+    
+    except:
+        print('Unexpected Error')
+
     
 args = parser.parse_args()
 print(args)
 
 if args.command == 'shorten':
     ShortenURL(args)
+
+if args.command == 'resolve':
+    ResolveCode(args)
