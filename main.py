@@ -39,8 +39,6 @@ def ShortenURL(args):
             return
 
         else:
-            print('Valid URL')
-
             data = {}
             try:
                 with open('data.json','r') as f:
@@ -49,17 +47,27 @@ def ShortenURL(args):
             except:
                 data = {}
 
-            if alias is None: 
-                h = hashlib.new('md5') #It generates the shortest hash(though it's not as secure as other algorithms)
-                h.update(url.encode())
-                url_hash = h.hexdigest()
-                data[url] = url_hash
-            
-            else:
-                data[url] = alias
+            if url in data.keys():
+                print('-'*5,'This URL has already been shortened and stored.','-'*5) 
+                print(url, '==>', data[url])
+                return data[url]
 
-            with open('data.json','w') as f:
-                json.dump(data,f)
+            else:
+                if alias is None: 
+                    h = hashlib.new('SHAKE-256') #This algo allows us to generate variable length hashes.
+                    h.update(url.encode())
+                    url_hash = h.hexdigest(5)
+                    data[url] = url_hash
+                
+                else:
+                    data[url] = alias
+
+                with open('data.json','w') as f:
+                    json.dump(data,f)
+            
+                print('-'*15,'URL shortened successfully','-'*15)
+                print(url, '==>', data[url])
+                return data[url]
             
     
     
