@@ -5,11 +5,13 @@ parser = argparse.ArgumentParser(description='URL Shortener')
 subparsers = parser.add_subparsers(dest='command', required=True)
 
 parser_shorten = subparsers.add_parser('shorten', help = 'shortens a URL')
-parser_shorten.add_argument('URL', help = 'URL to be shortened', nargs = "?")
+parser_shorten.add_argument('URL', help = 'URL to be shortened', nargs = "?") #nargs='?' allows us to pass 0 arguments to this command without getting an error.
 parser_shorten.add_argument('--alias', help = 'provide an alias(optional)', default= None)
 
 parser_resolve = subparsers.add_parser('resolve', help='resolves code back into URL')
 parser_resolve.add_argument('code', help='Code to be resolved back into a URL')
+
+parser_list = subparsers.add_parser('list', help='shows all generated URL-code pairs')
 
 def CheckValidity(url):
     try:
@@ -100,6 +102,21 @@ def ResolveCode(args):
     except:
         print('Unexpected Error')
 
+def ShowList():
+    try:
+        data = {}
+        with open('data.json', 'r') as f:
+            data = json.load(f)
+
+            print('-'*15,'List of shortened URLs','-'*15)
+            i = 1
+            for key, value in data.items():
+                print(f'{i}. ',key,'===>',value)
+                i += 1
+
+    except FileNotFoundError:
+        print("No URls have been shortened yet.")
+        return
     
 args = parser.parse_args()
 print(args)
@@ -109,3 +126,6 @@ if args.command == 'shorten':
 
 if args.command == 'resolve':
     ResolveCode(args)
+
+if args.command == 'list':
+    ShowList()
