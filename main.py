@@ -87,7 +87,6 @@ def ResolveCode(args):
 
             found = False
             for value in data.values():
-                print(value)
                 if code in value.values():
                     found = True
                     break
