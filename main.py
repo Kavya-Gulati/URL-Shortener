@@ -141,7 +141,6 @@ def ShowList():
         return
     
 args = parser.parse_args()
-print(args)
 
 if args.command == 'shorten':
     ShortenURL(args)
