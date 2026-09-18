@@ -54,25 +54,28 @@ def ShortenURL(args):
 
             if url in data.keys():
                 print('-'*5,'This URL has already been shortened and stored.','-'*5) 
-                print(url, '==>', data[url])
-                return data[url]
+                print(url, '==>', data[url]['code'])
+                return data[url]['code']
 
             else:
+                val = {}
                 if alias is None: 
                     h = hashlib.new('SHAKE-256') #This algo allows us to generate variable length hashes.
                     h.update(url.encode())
                     url_hash = h.hexdigest(5)
-                    data[url] = url_hash
+                    val['code'] = url_hash
+                    val['count'] = 0
+                    data[url] = val
                 
                 else:
-                    data[url] = alias
+                    data[url]['code'] = alias
 
                 with open('data.json','w') as f:
                     json.dump(data,f)
             
                 print('-'*15,'URL shortened successfully','-'*15)
-                print(url, '==>', data[url])
-                return data[url]
+                print(url, '==>', data[url]['code'])
+                return data[url]['code']
             
 def ResolveCode(args):
     code = args.code
@@ -81,19 +84,35 @@ def ResolveCode(args):
     try:
         with open('data.json', 'r') as f:
             data = json.load(f)
-            if code not in data.values():
+
+            found = False
+            for value in data.values():
+                print(value)
+                if code in value.values():
+                    found = True
+                    break
+                else:
+                    found = False
+            
+            if found == False:
                 print('error: The given code is invalid')
                 return
             
             else:
                 url = None
                 for key in data.keys():
-                    if data[key] == code:
+                    if data[key]['code'] == code:
+                        data[key]['count']+=1
                         url = key
+
+                        with open('data.json','w') as f:
+                            json.dump(data,f)
+
                         break
 
                 print('-'*9,'The code has been resolved into the URL','-'*9) 
                 print(code, '==>', url)
+                print(f'This Code has been resolved {data[url]['count']} times')
                 return url
     
     except FileNotFoundError:
@@ -110,8 +129,11 @@ def ShowList():
 
             print('-'*15,'List of shortened URLs','-'*15)
             i = 1
+
             for key, value in data.items():
-                print(f'{i}. ',key,'===>',value)
+                print(f'{i}. ',key,'===>',value['code'])
+                print(f'(It has been resolved {value['count']} times)')
+                print()
                 i += 1
 
     except FileNotFoundError:
